@@ -2,6 +2,8 @@
 
 A command line tool that prints the AST of a dart file.
 
+![Output example](https://raw.githubusercontent.com/GeKorm/docimages/master/astprinter/AST.png)
+
 ## Usage
 
 First, activate the package with pub global
