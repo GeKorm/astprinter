@@ -1,8 +1,15 @@
+import 'dart:io';
+
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/src/generated/ast.dart';
 
-main(List<String> path) {
-  CompilationUnit unit = parseDartFile(path[0]);
+main(List<String> args) {
+  if (args.length != 1) {
+    print("Usage: ast <path>");
+    exit(1);
+  }
+  
+  CompilationUnit unit = parseDartFile(args[0]);
   print(expandedAst(unit));
 }
 
