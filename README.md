@@ -20,4 +20,4 @@ To print the AST in the console, run ast <"absolutePathToDartFile">
 Printing to file is not yet supported. Neither is color-coded output.
 Please file feature requests and bugs on [GitHub][tracker].
 
-[tracker]: http://example.com/issues/replaceme
+[tracker]: https://github.com/GeKorm/astprinter/issues/new
