@@ -45,9 +45,9 @@ List<String> stuff = [];
 String buildListString(NodeList nl) {
   List<String> builder = [];
   for (var item in nl) {
-    builder.add(item.toString());
+    builder.add(item.runtimeType.toString() + '::: ' + item.toString());
   }
-  String temp = builder.join();
+  String temp = builder.join('\r');
   return temp;
 }
 
