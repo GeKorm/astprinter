@@ -15,9 +15,9 @@ First, activate the package with pub global
 You must manually add the pub cache bin directory to your PATH.
 Pub will warn you if you haven't already.
     
-To print the AST in the console, run ast <"absolutePathToDartFile">
+To print the AST in the console, run ast <"absolutePathToDartFile"> <-optional>
 
-    ast "C:\Users\Administrator\Dart Projects\TestProject\web\main.dart"
+    ast "C:\Path\web\main.dart" -dec
 
 Optional parameters: ```-dec``` and ```-dir```, print all
 nested declarations and directives respectively.
