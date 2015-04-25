@@ -2,54 +2,68 @@ import 'dart:io';
 import 'dart:mirrors';
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/src/generated/ast.dart';
+import 'package:analyzer/src/generated/scanner.dart';
 
-bool isType(dynamic obj, ClassMirror sec) {
-  return reflect(obj).type.isSubtypeOf(sec);
-}
+bool isSubType(dynamic obj, ClassMirror sec) =>
+    reflect(obj).type.isSubtypeOf(sec);
+
+Type typeOf(dynamic obj) => reflect(obj).type.reflectedType;
 
 main(List<String> args) {
   if (args.length == 1) {
     CompilationUnit unit = parseDartFile(args[0]);
     ClassMirror mirror = reflectClass(Object);
-    stdout.write(expandedAst(unit, mirror));
+    print(expandedAst(unit, mirror));
   } else if (args.length == 2) {
-    if (args[1] == '-dir') {
-      CompilationUnit unit = parseDartFile(args[0]);
-      stdout.write(astDirectives(unit));
-    } else if (args[1] == '-dec') {
-      CompilationUnit unit = parseDartFile(args[0]);
-      ClassMirror mirror = reflectClass(Declaration);
-      stdout.write(expandedAst(unit, mirror));
+    CompilationUnit unit = parseDartFile(args[0]);
+    List mirrors = createMirrors(args[1]);
+    if (mirrors[0] != null) {
+      print(expandedAst(unit, mirrors[0]));
+    } else if (mirrors[1] != null) {
+      print(expandedAst(unit, mirrors[1]));
     } else {
-      printUsageError();
+      print('Invalid AST node Type: ' + args[1]);
+      exit(2);
     }
   } else {
-    printUsageError();
+    print('''
+        Usage: ast <path> <Type(optional)> ||| prints the whole expanded AST
+
+        <path> must be absolute
+        <Type> will print all nodes that are subtypes of Type
+        ''');
+    exit(2);
   }
+}
+
+List createMirrors(String arg) {
+  MirrorSystem mirrors = currentMirrorSystem();
+  LibraryMirror engineAst = mirrors.libraries.values.firstWhere(
+      (LibraryMirror engineAst) =>
+          engineAst.qualifiedName == new Symbol('engine.ast'));
+  LibraryMirror engineScanner = mirrors.libraries.values.firstWhere(
+      (LibraryMirror engineScanner) =>
+          engineScanner.qualifiedName == new Symbol('engine.scanner'));
+  ClassMirror cmAst;
+  ClassMirror cmScanner;
+  try {
+    cmAst = engineAst.declarations[new Symbol(arg)];
+    cmScanner = engineScanner.declarations[new Symbol(arg)];
+  } catch (exception, stackTrace) {
+    //
+  }
+  return [cmAst, cmScanner];
 }
 
 String expandedAst(CompilationUnit u, ClassMirror c) {
   Iterable children = u.childEntities;
   getRecursiveChildren(children, c);
-  String temp = stuff.join('\r');
+  String temp = stuff.join('\n');
   stuff.clear();
   return temp;
 }
 
-String astDirectives(CompilationUnit u) {
-  return buildListString(u.directives);
-}
-
 List<String> stuff = [];
-
-String buildListString(NodeList nl) {
-  List<String> builder = [];
-  for (var item in nl) {
-    builder.add(item.runtimeType.toString() + '::: ' + item.toString());
-  }
-  String temp = builder.join('\r');
-  return temp;
-}
 
 void getRecursiveChildren(dynamic cu, ClassMirror nodeType,
     [List<String> builder, int count]) {
@@ -59,19 +73,17 @@ void getRecursiveChildren(dynamic cu, ClassMirror nodeType,
   }
   for (var ch in cu) {
     var temp = null;
-    if (isType(ch, nodeType)) {
+    if (isSubType(ch, nodeType)) {
       count++;
-      stuff.add(
-          spaces(count) + ch.runtimeType.toString() + '::: ' + ch.toString());
+      stuff.add(spaces(count) + typeOf(ch).toString() + '::: ' + ch.toString());
     }
     try {
       temp = ch.childEntities;
     } catch (exception, stackTrace) {
       //
     }
-
     if (temp != null) {
-      if (isType(ch, nodeType)) {
+      if (isSubType(ch, nodeType)) {
         builder.add(stuff.toString());
         getRecursiveChildren(temp, nodeType, builder, count);
         count--;
@@ -83,17 +95,10 @@ void getRecursiveChildren(dynamic cu, ClassMirror nodeType,
   }
 }
 
-void printUsageError() {
-  print('''Usage: ast <path> <-optional>
-  -dir prints directives"
-  -dec prints declarations''');
-  exit(1);
-}
-
 String spaces(int c) {
   List<String> spac = [];
-  if (c > 0) {
-    for (int i = 0; i < c; i++) {
+  if (c > 1) {
+    for (int i = 1; i < c; i++) {
       spac.add('  ');
     }
     return spac.join();
