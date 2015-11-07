@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.0
+
+- Updated `analyzer` dependency.
+
 ## 0.0.4
 
 - Added optional argument ```-n```, "no subtypes".

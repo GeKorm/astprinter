@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:mirrors';
 import 'package:analyzer/analyzer.dart';
 import 'package:analyzer/src/generated/ast.dart';
-import 'package:analyzer/src/generated/scanner.dart';
 
 bool isSubType(dynamic obj, List<ClassMirror> sec) {
   for (ClassMirror type in sec) {
@@ -23,8 +22,7 @@ bool isSubType(dynamic obj, List<ClassMirror> sec) {
 Type typeOf(dynamic obj) => reflect(obj).type.reflectedType;
 
 bool noSubTypes = false;
-List<String> failures = [],
-    stuff = [];
+List<String> failures = [], stuff = [];
 
 main(List<String> args) {
   if (args.length == 1) {
@@ -67,14 +65,14 @@ List<ClassMirror> createMirrors(List<String> types) {
   Map<Symbol, DeclarationMirror> combinedEngine = {};
   Map<Symbol, DeclarationMirror> engineAst = mirrors.libraries.values
       .firstWhere((LibraryMirror engine) =>
-          engine.qualifiedName == new Symbol('engine.ast')).declarations;
+          engine.qualifiedName == new Symbol('engine.ast'))
+      .declarations;
   Map<Symbol, DeclarationMirror> engineScanner = mirrors.libraries.values
       .firstWhere((LibraryMirror engine) =>
-          engine.qualifiedName == new Symbol('engine.scanner')).declarations;
+          engine.qualifiedName == new Symbol('engine.scanner'))
+      .declarations;
   List<ClassMirror> cmAst = [];
-  combinedEngine
-    ..addAll(engineAst)
-    ..addAll(engineScanner);
+  combinedEngine..addAll(engineAst)..addAll(engineScanner);
   for (var symbol in symbols) {
     if (combinedEngine.containsKey(symbol)) {
       cmAst.add(combinedEngine[symbol]);
@@ -120,7 +118,7 @@ void getRecursiveChildren(dynamic cu, List<ClassMirror> nodeTypes,
     }
     try {
       temp = ch.childEntities;
-    } catch (exception, stackTrace) {
+    } catch (exception) {
       //
     }
     if (temp != null) {
